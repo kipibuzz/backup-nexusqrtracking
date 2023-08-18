@@ -111,13 +111,13 @@ elif menu_choice == menu_choices["Attendance Statistics"]:
     # Attendance statistics page
     st.header('Attendance Statistics')
 
-    # # Query attendance data
-    # attendance_data = query_attendance_data()
+    # # # Query attendance data
+    # # attendance_data = query_attendance_data()
 
-    # Generate statistics
-    statistics = generate_attendance_statistics(attendance_data)
+    # # Generate statistics
+    # statistics = generate_attendance_statistics(attendance_data)
 
-    total_attended = statistics['Total Attended']
+    # total_attended = statistics['Total Attended']
     
     # Create a visually appealing and bold visualization for total attended
     st.write(
