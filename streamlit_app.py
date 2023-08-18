@@ -23,6 +23,7 @@ qr_codes_dir = "./qr_codes/"
 
 # Function to generate and store QR codes for employees
 # Function to generate QR codes and store them in Snowflake
+# Function to generate QR codes and store them in Snowflake
 def generate_and_store_qr_codes():
     conn = snowflake.connector.connect(
         user=CONNECTION_PARAMETERS['user'],
@@ -38,9 +39,10 @@ def generate_and_store_qr_codes():
     cursor.execute("SELECT ATTENDEE_ID, QR_CODE FROM EMP")
     employee_data = cursor.fetchall()
 
+    new_qr_codes_generated = 0
+
     for attendee_id, qr_code in employee_data:
         if qr_code:
-            st.write(f"QR code already exists for Attendee ID: {attendee_id}")
             continue
         
         qr = qrcode.QRCode(
@@ -65,9 +67,13 @@ def generate_and_store_qr_codes():
             (qr_byte_data, attendee_id)
         )
         conn.commit()
+        
+        new_qr_codes_generated += 1
 
     cursor.close()
     conn.close()
+
+    return new_qr_codes_generated
     
 # Function to generate attendance statistics
 def generate_attendance_statistics(data):
