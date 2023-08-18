@@ -18,7 +18,7 @@ CONNECTION_PARAMETERS = {
 }
 
 # Directory to save QR code images
-qr_codes_dir = "/path/to/qr_codes/"
+qr_codes_dir = "./qr_codes/"
 
 # Function to generate and store QR codes for employees
 def generate_and_store_qr_codes():
