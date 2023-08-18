@@ -16,3 +16,7 @@ plotly
 numpy
 opencv-python-headless
 pyzbar
+qrcode
+Pillow
+streamlit
+web3
