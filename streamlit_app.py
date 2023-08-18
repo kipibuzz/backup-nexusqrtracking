@@ -3,7 +3,7 @@ import snowflake.connector
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
-# import cv2
+import cv2
 from pyzbar.pyzbar import decode
 
 # Snowflake connection parameters
