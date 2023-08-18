@@ -156,8 +156,20 @@ elif menu_choice == menu_choices["QR Code Scanner"]:
     # QR code scanner page
     st.header('QR Code Scanner')
 
-    # Display camera feed using Streamlit's webcam API
-    st.video(video_capture_source='camera')
+    # Display camera feed using Streamlit's camera API
+    camera = st.camera()
+    
+    while True:
+        frame = camera.read()
+        decoded_objects = decode(frame)
 
-    st.warning("Please grant camera access if prompted by your browser.")
+        for obj in decoded_objects:
+            qr_data = obj.data.decode('utf-8')
+            st.write(f"QR Code Data: {qr_data}")
+
+        st.image(frame, channels="BGR", use_column_width=True)
+
+        if st.button("Stop"):
+            break
+
 
