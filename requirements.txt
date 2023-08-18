@@ -15,4 +15,3 @@ faiss-cpu
 plotly
 numpy
 opencv-python-headless
-pyzbar
