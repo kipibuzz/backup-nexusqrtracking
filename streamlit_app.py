@@ -149,3 +149,31 @@ elif menu_choice == menu_choices["Attendance Statistics"]:
     
     # Display the pie chart
     st.pyplot(plt)
+
+elif menu_choice == menu_choices["QR Code Scanner"]:
+    # QR code scanner page
+    st.header('QR Code Scanner')
+
+    cap = cv2.VideoCapture(0)
+
+    while True:
+        ret, frame = cap.read()
+
+        if not ret:
+            st.error("Camera capture failed")
+            break
+
+        decoded_objects = decode(frame)
+
+        for obj in decoded_objects:
+            qr_data = obj.data.decode('utf-8')
+            st.write(f"QR Code Data: {qr_data}")
+
+        st.image(frame, channels="BGR", use_column_width=True)
+
+        if st.button("Stop"):
+            break
+
+    cap.release()
+    cv2.destroyAllWindows()
+
