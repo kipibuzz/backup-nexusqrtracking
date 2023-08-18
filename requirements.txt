@@ -14,3 +14,5 @@ sqlalchemy
 faiss-cpu
 plotly
 numpy
+opencv-python
+pyzbar
