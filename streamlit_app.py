@@ -18,13 +18,8 @@ CONNECTION_PARAMETERS = {
     "warehouse": st.secrets['warehouse'],
 }
 
-# Directory to save QR code images
-qr_codes_dir = "./qr_codes/"
-
-# Function to generate and store QR codes for employees
-# Function to generate QR codes and store them in Snowflake
-# Function to generate QR codes and store them in Snowflake
-def generate_and_store_qr_codes():
+# Function to mark attendance based on QR code
+def mark_attendance_by_qr(qr_data):
     conn = snowflake.connector.connect(
         user=CONNECTION_PARAMETERS['user'],
         password=CONNECTION_PARAMETERS['password'],
@@ -35,57 +30,28 @@ def generate_and_store_qr_codes():
     )
     cursor = conn.cursor()
 
-    # Fetch attendee IDs from the EMP table
-    cursor.execute("SELECT ATTENDEE_ID, QR_CODE FROM EMP")
-    employee_data = cursor.fetchall()
-
-    new_qr_codes_generated = 0
-
-    for attendee_id, qr_code in employee_data:
-        if qr_code:
-            continue
-        
-        qr = qrcode.QRCode(
-            version=1,
-            error_correction=qrcode.constants.ERROR_CORRECT_L,
-            box_size=10,
-            border=4,
-        )
-        qr.add_data(attendee_id)
-        qr.make(fit=True)
-        qr_img = qr.make_image(fill_color="black", back_color="white")
-
-        # Save QR code image as bytes
-        qr_byte_stream = io.BytesIO()
-        qr_img.save(qr_byte_stream, format="PNG")
-        qr_byte_stream.seek(0)
-        qr_byte_data = qr_byte_stream.read()
-
-        # Update QR_CODE column with the generated QR code binary data
-        cursor.execute(
-            f"UPDATE EMP SET QR_CODE = %s WHERE ATTENDEE_ID = %s",
-            (qr_byte_data, attendee_id)
-        )
-        conn.commit()
-        
-        new_qr_codes_generated += 1
+    # Check if attendee exists and has not attended
+    cursor.execute(
+        f"SELECT ATTENDEE_ID, ATTENDED FROM EMP WHERE QR_CODE = '{qr_data}'"
+    )
+    row = cursor.fetchone()
+    if row:
+        attendee_id, attended = row
+        if attended:
+            message = f'Attendance already marked for Attendee ID: {attendee_id}'
+        else:
+            # Mark attendance
+            cursor.execute(
+                f"UPDATE EMP SET ATTENDED = TRUE WHERE ATTENDEE_ID = '{attendee_id}'"
+            )
+            conn.commit()
+            message = f'Attendance marked successfully for Attendee ID: {attendee_id}'
+    else:
+        message = 'Invalid QR code'
 
     cursor.close()
     conn.close()
-
-    return new_qr_codes_generated
-    
-# Function to generate attendance statistics
-def generate_attendance_statistics(data):
-    total_attendees = len(data)
-    total_attended = sum(1 for _, attended in data if attended)
-    total_not_attended = total_attendees - total_attended
-    return {
-        "Total Attendees": total_attendees,
-        "Total Attended": total_attended,
-        "Total Not Attended": total_not_attended,
-    }
-
+    return message
 
 # Streamlit app
 st.title('NexusPassCheck')
@@ -99,7 +65,12 @@ menu_choices = {
 
 menu_choice = st.sidebar.radio("Select Page", list(menu_choices.values()))
 
-if st.button('Generate QR Codes'):
+if menu_choice == menu_choices["Generate QR Codes"]:
+    # Generate QR codes page
+    st.header('Generate QR Codes')
+    st.write("Click the button below to generate and store QR codes for employees.")
+    
+    if st.button('Generate QR Codes'):
         new_qr_codes_generated = generate_and_store_qr_codes()
         if new_qr_codes_generated > 0:
             st.success(f"{new_qr_codes_generated} new QR codes generated and stored successfully!")
@@ -123,12 +94,19 @@ elif menu_choice == menu_choices["QR Code Scanner"]:
         for obj in decoded_objects:
             qr_data = obj.data.decode('utf-8')
             st.write(f"QR Code Data: {qr_data}")
-
+            
+            result_message = mark_attendance_by_qr(qr_data)
+            if 'successfully' in result_message:
+                st.success(result_message)
+            else:
+                st.error(result_message)
+                
 # elif menu_choice == menu_choices["Attendance Statistics"]:
 #     # Attendance statistics page
 #     st.header('Attendance Statistics')
 #     # ... (rest of your code for attendance statistics)
-           
+
+ 
 elif menu_choice == menu_choices["Attendance Statistics"]:
     # Attendance statistics page
     st.header('Attendance Statistics')
