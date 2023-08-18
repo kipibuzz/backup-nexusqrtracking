@@ -61,6 +61,18 @@ def generate_and_store_qr_codes():
     cursor.close()
     conn.close()
 
+# Function to generate attendance statistics
+def generate_attendance_statistics(data):
+    total_attendees = len(data)
+    total_attended = sum(1 for _, attended in data if attended)
+    total_not_attended = total_attendees - total_attended
+    return {
+        "Total Attendees": total_attendees,
+        "Total Attended": total_attended,
+        "Total Not Attended": total_not_attended,
+    }
+
+
 # Streamlit app
 st.title('NexusPassCheck')
 
@@ -102,46 +114,7 @@ elif menu_choice == menu_choices["Attendance Statistics"]:
     # Attendance statistics page
     st.header('Attendance Statistics')
     # ... (rest of your code for attendance statistics)
-
-
-# Function to generate attendance statistics
-def generate_attendance_statistics(data):
-    total_attendees = len(data)
-    total_attended = sum(1 for _, attended in data if attended)
-    total_not_attended = total_attendees - total_attended
-    return {
-        "Total Attendees": total_attendees,
-        "Total Attended": total_attended,
-        "Total Not Attended": total_not_attended,
-    }
-
-
-# Streamlit app
-st.title('NexusPassCheck')
- 
-# ... (rest of your code)
-
-# Custom menu options with emojis
-menu_choices = {
-    "Verify Attendance": "✅ Verify Attendance",
-    "Attendance Statistics": "📊 Attendance Statistics",
-    "QR Code Scanner": "📷 QR Code Scanner"
-}
-
-menu_choice = st.sidebar.radio("Select Page", list(menu_choices.values()))
-
-if menu_choice == menu_choices["Verify Attendance"]:
-    # Verify attendance page
-    st.header('Verify Attendance')
-    verification_code = st.text_input('Enter Verification Code:')
-    if st.button('Verify'):
-        if verification_code:
-            result_message = verify_and_mark_attendance(verification_code)
-            if 'successfully' in result_message:
-                st.success(result_message + " ✅")
-            else:
-                st.error(result_message + " ❌")
-                
+           
 elif menu_choice == menu_choices["Attendance Statistics"]:
     # Attendance statistics page
     st.header('Attendance Statistics')
