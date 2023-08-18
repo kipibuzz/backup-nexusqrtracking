@@ -6,6 +6,7 @@ import cv2
 from pyzbar.pyzbar import decode
 import qrcode
 import os
+import io
 
 # Snowflake connection parameters
 CONNECTION_PARAMETERS = {
@@ -21,6 +22,7 @@ CONNECTION_PARAMETERS = {
 qr_codes_dir = "./qr_codes/"
 
 # Function to generate and store QR codes for employees
+# Function to generate QR codes and store them in Snowflake
 def generate_and_store_qr_codes():
     conn = snowflake.connector.connect(
         user=CONNECTION_PARAMETERS['user'],
@@ -32,14 +34,11 @@ def generate_and_store_qr_codes():
     )
     cursor = conn.cursor()
 
-    cursor.execute("SELECT ATTENDEE_ID, QR_CODE FROM EMP")
-    employee_data = cursor.fetchall()
+    # Fetch attendee IDs from the EMP table
+    cursor.execute("SELECT ATTENDEE_ID FROM EMP")
+    attendee_ids = [row[0] for row in cursor.fetchall()]
 
-    for attendee_id, qr_code in employee_data:
-        if qr_code:
-            print(f"QR code already exists for Attendee ID: {attendee_id}")
-            continue
-        
+    for attendee_id in attendee_ids:
         qr = qrcode.QRCode(
             version=1,
             error_correction=qrcode.constants.ERROR_CORRECT_L,
@@ -50,11 +49,16 @@ def generate_and_store_qr_codes():
         qr.make(fit=True)
         qr_img = qr.make_image(fill_color="black", back_color="white")
 
-        qr_img_path = os.path.join(qr_codes_dir, f"{attendee_id}.png")
-        qr_img.save(qr_img_path)
+        # Save QR code image as bytes
+        qr_byte_stream = io.BytesIO()
+        qr_img.save(qr_byte_stream, format="PNG")
+        qr_byte_stream.seek(0)
+        qr_byte_data = qr_byte_stream.read()
 
+        # Update QR_CODE column with the generated QR code binary data
         cursor.execute(
-            f"UPDATE EMP SET QR_CODE = '{qr_img_path}' WHERE ATTENDEE_ID = '{attendee_id}'"
+            f"UPDATE EMP SET QR_CODE = %s WHERE ATTENDEE_ID = %s",
+            (qr_byte_data, attendee_id)
         )
         conn.commit()
 
