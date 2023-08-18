@@ -110,10 +110,10 @@ elif menu_choice == menu_choices["QR Code Scanner"]:
             qr_data = obj.data.decode('utf-8')
             st.write(f"QR Code Data: {qr_data}")
 
-elif menu_choice == menu_choices["Attendance Statistics"]:
-    # Attendance statistics page
-    st.header('Attendance Statistics')
-    # ... (rest of your code for attendance statistics)
+# elif menu_choice == menu_choices["Attendance Statistics"]:
+#     # Attendance statistics page
+#     st.header('Attendance Statistics')
+#     # ... (rest of your code for attendance statistics)
            
 elif menu_choice == menu_choices["Attendance Statistics"]:
     # Attendance statistics page
