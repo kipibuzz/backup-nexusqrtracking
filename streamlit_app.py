@@ -35,10 +35,14 @@ def generate_and_store_qr_codes():
     cursor = conn.cursor()
 
     # Fetch attendee IDs from the EMP table
-    cursor.execute("SELECT ATTENDEE_ID FROM EMP")
-    attendee_ids = [row[0] for row in cursor.fetchall()]
+    cursor.execute("SELECT ATTENDEE_ID, QR_CODE FROM EMP")
+    employee_data = cursor.fetchall()
 
-    for attendee_id in attendee_ids:
+    for attendee_id, qr_code in employee_data:
+        if qr_code:
+            st.write(f"QR code already exists for Attendee ID: {attendee_id}")
+            continue
+        
         qr = qrcode.QRCode(
             version=1,
             error_correction=qrcode.constants.ERROR_CORRECT_L,
@@ -64,7 +68,7 @@ def generate_and_store_qr_codes():
 
     cursor.close()
     conn.close()
-
+    
 # Function to generate attendance statistics
 def generate_attendance_statistics(data):
     total_attendees = len(data)
