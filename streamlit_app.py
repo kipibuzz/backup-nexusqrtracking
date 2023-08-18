@@ -92,8 +92,10 @@ st.title('NexusPassCheck')
 # Custom menu options with emojis
 menu_choices = {
     "Verify Attendance": "✅ Verify Attendance",
-    "Attendance Statistics": "📊 Attendance Statistics"
+    "Attendance Statistics": "📊 Attendance Statistics",
+    "QR Code Scanner": "📷 QR Code Scanner"
 }
+
 menu_choice = st.sidebar.radio("Select Page", list(menu_choices.values()))
 
 if menu_choice == menu_choices["Verify Attendance"]:
