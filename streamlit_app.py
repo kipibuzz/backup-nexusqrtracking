@@ -99,14 +99,14 @@ menu_choices = {
 
 menu_choice = st.sidebar.radio("Select Page", list(menu_choices.values()))
 
-if menu_choice == menu_choices["Generate QR Codes"]:
-    # Generate QR codes page
-    st.header('Generate QR Codes')
-    st.write("Click the button below to generate and store QR codes for employees.")
-    
-    if st.button('Generate QR Codes'):
-        generate_and_store_qr_codes()
-        st.success("QR codes generated and stored successfully!")
+if st.button('Generate QR Codes'):
+        new_qr_codes_generated = generate_and_store_qr_codes()
+        if new_qr_codes_generated > 0:
+            st.success(f"{new_qr_codes_generated} new QR codes generated and stored successfully!")
+        elif new_qr_codes_generated == 0:
+            st.info("No new QR codes generated. QR codes already exist for all attendees.")
+        else:
+            st.warning("QR codes could not be generated. Please check for any issues.")
 
 elif menu_choice == menu_choices["QR Code Scanner"]:
     # QR code scanner page
