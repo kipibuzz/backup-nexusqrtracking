@@ -177,5 +177,4 @@ elif menu_choice == menu_choices["QR Code Scanner"]:
             break
 
     cap.release()
-    cv2.destroyAllWindows()
 
