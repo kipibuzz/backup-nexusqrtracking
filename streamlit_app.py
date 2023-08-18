@@ -1,10 +1,11 @@
 import streamlit as st
 import snowflake.connector
-import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 import cv2
 from pyzbar.pyzbar import decode
+import qrcode
+import os
 
 # Snowflake connection parameters
 CONNECTION_PARAMETERS = {
@@ -16,8 +17,11 @@ CONNECTION_PARAMETERS = {
     "warehouse": st.secrets['warehouse'],
 }
 
-# Function to verify and mark attendance
-def verify_and_mark_attendance(verification_code):
+# Directory to save QR code images
+qr_codes_dir = "/path/to/qr_codes/"
+
+# Function to generate and store QR codes for employees
+def generate_and_store_qr_codes():
     conn = snowflake.connector.connect(
         user=CONNECTION_PARAMETERS['user'],
         password=CONNECTION_PARAMETERS['password'],
@@ -28,49 +32,77 @@ def verify_and_mark_attendance(verification_code):
     )
     cursor = conn.cursor()
 
-    # Check if attendee exists and has not attended
-    cursor.execute(
-        f"SELECT ATTENDEE_ID, ATTENDED FROM EMP WHERE CODE = '{verification_code}'"
-    )
-    row = cursor.fetchone()
-    if row:
-        attendee_id, attended = row
-        if attended:
-            message = f'Attendance already marked for Attendee ID: {attendee_id}'
-        else:
-            # Mark attendance
-            cursor.execute(
-                f"UPDATE EMP SET ATTENDED = TRUE WHERE ATTENDEE_ID = '{attendee_id}'"
-            )
-            conn.commit()
-            message = f'Code verified successfully for Attendee ID: {attendee_id}! They are marked as attended.'
-    else:
-        message = 'Invalid code'
+    cursor.execute("SELECT ATTENDEE_ID, QR_CODE FROM EMP")
+    employee_data = cursor.fetchall()
+
+    for attendee_id, qr_code in employee_data:
+        if qr_code:
+            print(f"QR code already exists for Attendee ID: {attendee_id}")
+            continue
+        
+        qr = qrcode.QRCode(
+            version=1,
+            error_correction=qrcode.constants.ERROR_CORRECT_L,
+            box_size=10,
+            border=4,
+        )
+        qr.add_data(attendee_id)
+        qr.make(fit=True)
+        qr_img = qr.make_image(fill_color="black", back_color="white")
+
+        qr_img_path = os.path.join(qr_codes_dir, f"{attendee_id}.png")
+        qr_img.save(qr_img_path)
+
+        cursor.execute(
+            f"UPDATE EMP SET QR_CODE = '{qr_img_path}' WHERE ATTENDEE_ID = '{attendee_id}'"
+        )
+        conn.commit()
 
     cursor.close()
     conn.close()
-    return message
+
+# Streamlit app
+st.title('NexusPassCheck')
+
+# Custom menu options with emojis
+menu_choices = {
+    "Generate QR Codes": "🔐 Generate QR Codes",
+    "QR Code Scanner": "📷 QR Code Scanner",
+    "Attendance Statistics": "📊 Attendance Statistics",
+}
+
+menu_choice = st.sidebar.radio("Select Page", list(menu_choices.values()))
+
+if menu_choice == menu_choices["Generate QR Codes"]:
+    # Generate QR codes page
+    st.header('Generate QR Codes')
+    st.write("Click the button below to generate and store QR codes for employees.")
     
+    if st.button('Generate QR Codes'):
+        generate_and_store_qr_codes()
+        st.success("QR codes generated and stored successfully!")
 
-# Function to query attendance data
-def query_attendance_data():
-    conn = snowflake.connector.connect(
-        user=CONNECTION_PARAMETERS['user'],
-        password=CONNECTION_PARAMETERS['password'],
-        account=CONNECTION_PARAMETERS['account'],
-        warehouse=CONNECTION_PARAMETERS['warehouse'],
-        database=CONNECTION_PARAMETERS['database'],
-        schema=CONNECTION_PARAMETERS['schema']
-    )
-    cursor = conn.cursor()
+elif menu_choice == menu_choices["QR Code Scanner"]:
+    # QR code scanner page
+    st.header('QR Code Scanner')
 
-    # Query attendance data
-    cursor.execute("SELECT ATTENDEE_ID, ATTENDED FROM EMP")
-    data = cursor.fetchall()
+    image = st.camera_input("Show QR code")
 
-    cursor.close()
-    conn.close()
-    return data
+    if image is not None:
+        bytes_data = image.getvalue()
+        cv2_img = cv2.imdecode(np.frombuffer(bytes_data, np.uint8), cv2.IMREAD_COLOR)
+
+        decoded_objects = decode(cv2_img)
+
+        for obj in decoded_objects:
+            qr_data = obj.data.decode('utf-8')
+            st.write(f"QR Code Data: {qr_data}")
+
+elif menu_choice == menu_choices["Attendance Statistics"]:
+    # Attendance statistics page
+    st.header('Attendance Statistics')
+    # ... (rest of your code for attendance statistics)
+
 
 # Function to generate attendance statistics
 def generate_attendance_statistics(data):
@@ -152,19 +184,5 @@ elif menu_choice == menu_choices["Attendance Statistics"]:
     # Display the pie chart
     st.pyplot(plt)
 
-elif menu_choice == menu_choices["QR Code Scanner"]:
-    # QR code scanner page
-    st.header('QR Code Scanner')
-
-    image = st.camera_input("Show QR code")
-
-    if image is not None:
-        bytes_data = image.getvalue()
-        cv2_img = cv2.imdecode(np.frombuffer(bytes_data, np.uint8), cv2.IMREAD_COLOR)
-
-        decoded_objects = decode(cv2_img)
-
-        for obj in decoded_objects:
-            qr_data = obj.data.decode('utf-8')
-            st.write(f"QR Code Data: {qr_data}")
+ 
 
