@@ -176,6 +176,7 @@ if st.button("Generate QR Codes"):
 # QR code scanner page
 # QR code scanner page
 # QR code scanner page
+# QR code scanner page
 if menu_choice == menu_choices["QR Code Scanner"]:
     st.header('QR Code Scanner')
 
@@ -191,33 +192,48 @@ if menu_choice == menu_choices["QR Code Scanner"]:
             qr_data = obj.data.decode('utf-8')
             st.write(f"QR Code Data: {qr_data}")
 
-            # Fetch the QR_CODE identifier from the Snowflake table based on the scanned QR data (Attendee ID)
-            conn = snowflake.connector.connect(
-                user=CONNECTION_PARAMETERS['user'],
-                password=CONNECTION_PARAMETERS['password'],
-                account=CONNECTION_PARAMETERS['account'],
-                warehouse=CONNECTION_PARAMETERS['warehouse'],
-                database=CONNECTION_PARAMETERS['database'],
-                schema=CONNECTION_PARAMETERS['schema']
-            )
-            cursor = conn.cursor()
+            # Split the scanned QR data into ID and name
+            qr_parts = qr_data.split()
+            if len(qr_parts) == 2:
+                scanned_id = qr_parts[0]
+                scanned_name = qr_parts[1]
 
-            cursor.execute(f"SELECT QR_CODE, ATTENDED FROM EMP WHERE ATTENDEE_ID = '{qr_data}'")
-            row = cursor.fetchone()
-            
-            if row:
-                qr_code_identifier, attended = row
-                if qr_code_identifier:
-                    # Mark attendance as attended
-                    mark_attendance(qr_data)
-                    st.success("QR code scanned successfully. Attendee marked as attended.")
+                # Fetch the QR_CODE identifier from the Snowflake table based on the scanned ID
+                conn = snowflake.connector.connect(
+                    user=CONNECTION_PARAMETERS['user'],
+                    password=CONNECTION_PARAMETERS['password'],
+                    account=CONNECTION_PARAMETERS['account'],
+                    warehouse=CONNECTION_PARAMETERS['warehouse'],
+                    database=CONNECTION_PARAMETERS['database'],
+                    schema=CONNECTION_PARAMETERS['schema']
+                )
+                cursor = conn.cursor()
+
+                cursor.execute(f"SELECT QR_CODE, ATTENDED FROM EMP WHERE ATTENDEE_ID = '{scanned_id}'")
+                row = cursor.fetchone()
+
+                if row:
+                    qr_code_identifier, attended = row
+                    if qr_code_identifier:
+                        # Check if the file exists in the Snowflake stage (S3)
+                        try:
+                            cursor.execute(f"COPY INTO @s3_stage FROM {qr_code_identifier} FILES=({scanned_id})")
+                            conn.commit()
+                            mark_attendance(scanned_id)  # Mark attendee as attended
+                            st.success("QR code scanned successfully. Attendee marked as attended.")
+                        except Exception as e:
+                            st.warning("QR code found in the database, but an error occurred while processing the QR code.")
+                            print(e)
+                    else:
+                        st.warning("Invalid QR code.")
                 else:
-                    st.warning("Invalid QR code.")
-            else:
-                st.warning("QR code not found in the database.")
+                    st.warning("QR code not found in the database.")
 
-            cursor.close()
-            conn.close()
+                cursor.close()
+                conn.close()
+            else:
+                st.warning("Invalid QR code format.")
+
 
 
 # elif menu_choice == menu_choices["Attendance Statistics"]:
