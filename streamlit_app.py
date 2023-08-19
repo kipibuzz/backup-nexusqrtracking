@@ -200,26 +200,7 @@ if menu_choice == menu_choices["QR Code Scanner"]:
 
     if start_scanning:
         st.subheader("QR Code Scanner")
-
-        # Apply custom CSS to style the camera feed
-        st.markdown(
-            """
-            <style>
-            .qr-camera-container {
-                position: relative;
-                width: 100%;
-                padding-bottom: 100%; /* 1:1 aspect ratio */
-                overflow: hidden;
-            }
-            .qr-camera {
-                position: absolute;
-                width: 100%;
-                height: 100%;
-            }
-            </style>
-            """,
-            unsafe_allow_html=True,
-        )
+ 
 
         # Display the camera feed
         with st.markdown("<div class='qr-camera-container'><img class='qr-camera' src='/media/qr_camera' /></div>", unsafe_allow_html=True):
