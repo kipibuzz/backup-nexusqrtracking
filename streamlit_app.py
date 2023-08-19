@@ -6,6 +6,7 @@ import cv2
 from pyzbar.pyzbar import decode
 import qrcode
 import os
+import io
 
 # Snowflake connection parameters
 CONNECTION_PARAMETERS = {
@@ -18,9 +19,11 @@ CONNECTION_PARAMETERS = {
 }
 
 # Directory to save QR code images
-qr_codes_dir = "/path/to/qr_codes/"
+qr_codes_dir = "./qr_codes/"
 
 # Function to generate and store QR codes for employees
+# Function to generate QR codes and store them in Snowflake
+# Function to generate QR codes and store them in Snowflake
 def generate_and_store_qr_codes():
     conn = snowflake.connector.connect(
         user=CONNECTION_PARAMETERS['user'],
@@ -32,12 +35,14 @@ def generate_and_store_qr_codes():
     )
     cursor = conn.cursor()
 
+    # Fetch attendee IDs from the EMP table
     cursor.execute("SELECT ATTENDEE_ID, QR_CODE FROM EMP")
     employee_data = cursor.fetchall()
 
+    new_qr_codes_generated = 0
+
     for attendee_id, qr_code in employee_data:
         if qr_code:
-            print(f"QR code already exists for Attendee ID: {attendee_id}")
             continue
         
         qr = qrcode.QRCode(
@@ -50,17 +55,26 @@ def generate_and_store_qr_codes():
         qr.make(fit=True)
         qr_img = qr.make_image(fill_color="black", back_color="white")
 
-        qr_img_path = os.path.join(qr_codes_dir, f"{attendee_id}.png")
-        qr_img.save(qr_img_path)
+        # Save QR code image as bytes
+        qr_byte_stream = io.BytesIO()
+        qr_img.save(qr_byte_stream, format="PNG")
+        qr_byte_stream.seek(0)
+        qr_byte_data = qr_byte_stream.read()
 
+        # Update QR_CODE column with the generated QR code binary data
         cursor.execute(
-            f"UPDATE EMP SET QR_CODE = '{qr_img_path}' WHERE ATTENDEE_ID = '{attendee_id}'"
+            f"UPDATE EMP SET QR_CODE = %s WHERE ATTENDEE_ID = %s",
+            (qr_byte_data, attendee_id)
         )
         conn.commit()
+        
+        new_qr_codes_generated += 1
 
     cursor.close()
     conn.close()
 
+    return new_qr_codes_generated
+    
 # Function to generate attendance statistics
 def generate_attendance_statistics(data):
     total_attendees = len(data)
@@ -85,14 +99,14 @@ menu_choices = {
 
 menu_choice = st.sidebar.radio("Select Page", list(menu_choices.values()))
 
-if menu_choice == menu_choices["Generate QR Codes"]:
-    # Generate QR codes page
-    st.header('Generate QR Codes')
-    st.write("Click the button below to generate and store QR codes for employees.")
-    
-    if st.button('Generate QR Codes'):
-        generate_and_store_qr_codes()
-        st.success("QR codes generated and stored successfully!")
+if st.button('Generate QR Codes'):
+        new_qr_codes_generated = generate_and_store_qr_codes()
+        if new_qr_codes_generated > 0:
+            st.success(f"{new_qr_codes_generated} new QR codes generated and stored successfully!")
+        elif new_qr_codes_generated == 0:
+            st.info("No new QR codes generated. QR codes already exist for all attendees.")
+        else:
+            st.warning("QR codes could not be generated. Please check for any issues.")
 
 elif menu_choice == menu_choices["QR Code Scanner"]:
     # QR code scanner page
