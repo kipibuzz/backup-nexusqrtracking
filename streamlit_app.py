@@ -173,7 +173,8 @@ if st.button("Generate QR Codes"):
         st.warning("QR codes could not be generated. Please check for any issues.")
 
 # QR code scanner page
-    if menu_choice == menu_choices["QR Code Scanner"]:
+ 
+if menu_choice == menu_choices["QR Code Scanner"]:
     st.header('QR Code Scanner')
 
     image = st.camera_input("Show QR code")
