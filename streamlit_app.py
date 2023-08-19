@@ -179,20 +179,17 @@ if menu_choice == menu_choices["QR Code Scanner"]:
             s3_file_name = f'qrcodes/{qr_data}.png'
             try:
                 s3.head_object(Bucket='qrstore', Key=s3_file_name)  # Use your actual bucket name
-                if qr_data in attendance_status:
-                    if attendance_status[qr_data]:
-                        st.error("QR code already scanned and attendee marked.")
-                    else:
-                        attendance_status[qr_data] = True
-                        mark_attendance(qr_data)  # Mark attendee as attended
-                        st.success("QR code scanned successfully. Attendee marked as attended.")
-                else:
-                    st.warning("QR code scanned, but attendee not registered for the event.")
+                
+                # Mark attendance if the QR code data matches an attendee
+                mark_attendance(qr_data)  # Mark attendee as attended
+                st.success("QR code scanned successfully. Attendee marked as attended.")
+                
             except botocore.exceptions.ClientError as e:
                 if e.response['Error']['Code'] == "404":
                     st.error("Invalid QR code. Please try again.")
                 else:
                     st.warning("An error occurred while processing the QR code.")
+
 
 # elif menu_choice == menu_choices["Attendance Statistics"]:
 #     # Attendance statistics page
