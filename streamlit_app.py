@@ -20,12 +20,20 @@ CONNECTION_PARAMETERS = {
     "warehouse": st.secrets['warehouse'],
 }
 
-# Directory to save QR code images
-qr_codes_dir = "./qr_codes/"
+aws_access_key_id = st.secrets['access_key']
+aws_secret_access_key = st.secrets['secret_key']
+aws_region = st.secrets['region']
 
-# Function to generate and store QR codes for employees
-# Function to generate QR codes and store them in Snowflake
-# Function to generate QR codes and store them in Snowflake
+s3 = boto3.client(
+    's3',
+    aws_access_key_id=aws_access_key_id,
+    aws_secret_access_key=aws_secret_access_key,
+    region_name=aws_region
+)
+
+s3 = session.create_client('s3')
+# Directory to save QR code images
+
 def generate_and_store_qr_codes():
     conn = snowflake.connector.connect(
         user=CONNECTION_PARAMETERS['user'],
