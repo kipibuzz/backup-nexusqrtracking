@@ -49,7 +49,7 @@ def generate_and_store_qr_codes():
   
 
 
-   for attendee_id, qr_code in employee_data:
+    for attendee_id, qr_code in employee_data:
         if qr_code:
             continue
         
