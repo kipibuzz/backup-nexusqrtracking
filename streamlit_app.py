@@ -201,6 +201,7 @@ st.markdown(
     """,
     unsafe_allow_html=True,)
 
+
 if menu_choice == menu_choices["QR Code Scanner"]:
     st.header('QR Code Scanner')
     col1, col2 = st.columns([1, 2])
@@ -226,8 +227,22 @@ if menu_choice == menu_choices["QR Code Scanner"]:
                     st.warning("Invalid QR code")
                     continue
 
-                # ... (your database retrieval and attendance marking logic)
-                
+                # Fetch the QR_CODE identifier from the Snowflake table based on the scanned QR data
+                conn = snowflake.connector.connect(
+                    user=CONNECTION_PARAMETERS['user'],
+                    password=CONNECTION_PARAMETERS['password'],
+                    account=CONNECTION_PARAMETERS['account'],
+                    warehouse=CONNECTION_PARAMETERS['warehouse'],
+                    database=CONNECTION_PARAMETERS['database'],
+                    schema=CONNECTION_PARAMETERS['schema']
+                )
+                cursor = conn.cursor()
+
+                cursor.execute(f"SELECT QR_CODE, ATTENDED FROM EMP WHERE ATTENDEE_ID = '{attendee_id}' AND NAME = '{attendee_name}'")
+                row = cursor.fetchone()
+
+                # ... (your attendance marking logic)
+
                 cursor.close()
                 conn.close()
 
@@ -251,6 +266,7 @@ if menu_choice == menu_choices["QR Code Scanner"]:
 
         else:
             st.warning("No QR code detected in the image. Please try again.")
+
 
 
 
