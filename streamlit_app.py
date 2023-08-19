@@ -20,21 +20,6 @@ CONNECTION_PARAMETERS = {
     "warehouse": st.secrets['warehouse'],
 }
 
-# Retrieve secrets
-aws_access_key_id = st.secrets['access_key']
-aws_secret_access_key = st.secrets['secret_key']
-aws_region = st.secrets['region']  # Make sure this is in the correct format like 'us-east-1'
-
-# Create an S3 client using the retrieved secrets
-s3 = boto3.client(
-    's3',
-    aws_access_key_id=aws_access_key_id,
-    aws_secret_access_key=aws_secret_access_key,
-    region_name=aws_region
-)
-
-# Directory to save QR code images
-
 def generate_and_store_qr_codes():
     conn = snowflake.connector.connect(
         user=CONNECTION_PARAMETERS['user'],
@@ -50,15 +35,14 @@ def generate_and_store_qr_codes():
     cursor.execute("SELECT ATTENDEE_ID, QR_CODE FROM EMP")
     employee_data = cursor.fetchall()
 
-    # new_qr_codes_generated = 0
-
-   # def generate_and_store_qr_codes():
-   #  # ... (other code)
     new_qr_codes_generated = 0  # Initialize the counter
 
-  
-
-    s3 = boto3.client('s3')
+    s3 = boto3.client(
+        's3',
+        aws_access_key_id=aws_access_key_id,
+        aws_secret_access_key=aws_secret_access_key,
+        region_name=aws_region
+    )
 
     for attendee_id, qr_code in employee_data:
         if qr_code:
@@ -80,7 +64,7 @@ def generate_and_store_qr_codes():
 
         # Upload QR code image to S3 bucket
         s3_file_name = f'qrcodes/{attendee_id}.png'
-        s3.upload_file(temp_file.name, 'your-s3-bucket-name', s3_file_name)
+        s3.upload_file(temp_file.name, 'qrstore', s3_file_name)
 
         # Clean up temporary file
         os.unlink(temp_file.name)
@@ -92,6 +76,8 @@ def generate_and_store_qr_codes():
         conn.commit()
         
         new_qr_codes_generated += 1  # Increment the counter
+
+    conn.close()
 
     return new_qr_codes_generated
 
