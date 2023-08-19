@@ -205,8 +205,8 @@ if menu_choice == menu_choices["QR Code Scanner"]:
     st.header('QR Code Scanner')
 
     # Display the camera feed using camera_input
-    image = st.camera_input("Show QR code", key="qr_camera", use_container_width=True, label_visibility="hidden")
-
+    with st.container():
+         image = st.camera_input("Show QR code", key="qr_camera")
     if image is not None:
         bytes_data = image.getvalue()
         cv2_img = cv2.imdecode(np.frombuffer(bytes_data, np.uint8), cv2.IMREAD_COLOR)
