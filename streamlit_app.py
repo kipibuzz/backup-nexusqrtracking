@@ -166,15 +166,15 @@ if menu_choice == menu_choices["QR Code Scanner"]:
     image = st.camera_input("Show QR code")
 
     if image is not None:
-        bytes_data = image.getvalue()
-        cv2_img = cv2.imdecode(np.frombuffer(bytes_data, np.uint8), cv2.IMREAD_COLOR)
+    bytes_data = image.getvalue()
+    cv2_img = cv2.imdecode(np.frombuffer(bytes_data, np.uint8), cv2.IMREAD_COLOR)
 
-        decoded_objects = decode(cv2_img)
+    decoded_objects = decode(cv2_img)
 
-       for obj in decoded_objects:
-           qr_data = obj.data.decode('utf-8')
-           print(f"Scanned QR Code Data: {qr_data}")  # Add this line
-           st.write(f"QR Code Data: {qr_data}")
+    for obj in decoded_objects:
+        qr_data = obj.data.decode('utf-8')
+        print(f"Scanned QR Code Data: {qr_data}")  # Add this line
+        st.write(f"QR Code Data: {qr_data}")
     # Rest of the logic
 
 
