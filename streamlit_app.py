@@ -195,8 +195,12 @@ if st.button("Generate QR Codes"):
 if menu_choice == menu_choices["QR Code Scanner"]:
     st.header('QR Code Scanner')
 
-    image = st.camera_input("Show QR code")
+       # Add a button to start scanning
+    start_scanning = st.button("Start Scanning")
 
+    if start_scanning:
+        # Display the camera feed
+        image = st.camera_input("Show QR code", use_container_width=True, height=450)
     if image is not None:
         bytes_data = image.getvalue()
         cv2_img = cv2.imdecode(np.frombuffer(bytes_data, np.uint8), cv2.IMREAD_COLOR)
