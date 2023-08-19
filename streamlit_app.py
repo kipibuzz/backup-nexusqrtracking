@@ -95,19 +95,36 @@ def generate_and_store_qr_codes():
         conn.commit()
         
         new_qr_codes_generated += 1  # Increment the counter
-
-            # Update attendance status
-    update_query = "UPDATE EMP SET ATTENDED = TRUE WHERE ATTENDEE_ID = %s"
-    cursor.execute(update_query, (attendee_id,))
-    conn.commit()
-
-    # Close the cursor and connection
     cursor.close()
     conn.close()
  
 
     return new_qr_codes_generated
 
+def mark_attendance(attendee_id):
+    conn = snowflake.connector.connect(
+        user=CONNECTION_PARAMETERS['user'],
+        password=CONNECTION_PARAMETERS['password'],
+        account=CONNECTION_PARAMETERS['account'],
+        warehouse=CONNECTION_PARAMETERS['warehouse'],
+        database=CONNECTION_PARAMETERS['database'],
+        schema=CONNECTION_PARAMETERS['schema']
+    )
+    cursor = conn.cursor()
+
+    # Update attendance status
+    update_query = "UPDATE EMP SET ATTENDED = TRUE WHERE ATTENDEE_ID = %s"
+    try:
+        cursor.execute(update_query, (attendee_id,))
+        conn.commit()
+        st.success("Attendance marked successfully.")
+    except Exception as e:
+        st.error(f"Error while marking attendance: {e}")
+        conn.rollback()
+
+    # Close the cursor and connection
+    cursor.close()
+    conn.close()
     
 # Function to generate attendance statistics
 def generate_attendance_statistics(data):
