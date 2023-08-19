@@ -163,8 +163,9 @@ if st.button("Generate QR Codes"):
         st.warning("QR codes could not be generated. Please check for any issues.")
 
 # QR code scanner page
+# QR code scanner page
 if menu_choice == menu_choices["QR Code Scanner"]:
-    st.header("QR Code Scanner")
+    st.header('QR Code Scanner')
 
     image = st.camera_input("Show QR code")
 
@@ -172,36 +173,33 @@ if menu_choice == menu_choices["QR Code Scanner"]:
         bytes_data = image.getvalue()
         cv2_img = cv2.imdecode(np.frombuffer(bytes_data, np.uint8), cv2.IMREAD_COLOR)
 
-    decoded_objects = decode(cv2_img)
+        decoded_objects = decode(cv2_img)
 
-    for obj in decoded_objects:
-        qr_data = obj.data.decode("utf-8")
-    print(f"Scanned QR Code Data: {qr_data}")  # Add this line
-    st.write(f"QR Code Data: {qr_data}")
+        for obj in decoded_objects:
+            qr_data = obj.data.decode('utf-8')
+            print(f"Scanned QR Code Data: {qr_data}")  # Print scanned QR code data
+            st.write(f"QR Code Data: {qr_data}")
 
-    # Check if the scanned QR code exists in the S3 bucket (valid QR code)
-    s3_file_name = f"qrcodes/{qr_data}.png"
-    try:
-        s3.head_object(
-            Bucket="qrstore", Key=s3_file_name
-        )  # Use your actual bucket name
+            # Check if the scanned QR code exists in the S3 bucket (valid QR code)
+            s3_file_name = f"qrcodes/{qr_data}.png"
+            try:
+                s3.head_object(Bucket="qrstore", Key=s3_file_name)
 
-        if qr_data in attendance_status:
-            if attendance_status[qr_data]:
-                st.warning("QR code already scanned and attendee marked.")
-            else:
-                attendance_status[qr_data] = True
-                mark_attendance(qr_data)  # Mark attendee as attended
-                st.success("QR code scanned successfully. Attendee marked as attended.")
-        else:
-            st.warning("QR code scanned, but attendee not registered for the event.")
+                if qr_data in attendance_status:
+                    if attendance_status[qr_data]:
+                        st.warning("QR code already scanned and attendee marked.")
+                    else:
+                        attendance_status[qr_data] = True
+                        mark_attendance(qr_data)  # Mark attendee as attended
+                        st.success("QR code scanned successfully. Attendee marked as attended.")
+                else:
+                    st.warning("QR code scanned, but attendee not registered for the event.")
 
-    except botocore.exceptions.ClientError as e:
-        if e.response["Error"]["Code"] == "404":
-            st.error("Invalid QR code. Please try again.")
-        else:
-            st.warning("An error occurred while processing the QR code.")
-
+            except botocore.exceptions.ClientError as e:
+                if e.response["Error"]["Code"] == "404":
+                    st.error("Invalid QR code. Please try again.")
+                else:
+                    st.warning("An error occurred while processing the QR code.")
 
 # elif menu_choice == menu_choices["Attendance Statistics"]:
 #     # Attendance statistics page
