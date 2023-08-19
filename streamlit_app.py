@@ -10,6 +10,7 @@ import io
 import tempfile
 import boto3
 import botocore
+import botocore.exceptions
 
 
 attendance_status = {}
@@ -23,6 +24,12 @@ CONNECTION_PARAMETERS = {
     "schema": st.secrets['schema'],
     "warehouse": st.secrets['warehouse'],
 }
+    s3 = boto3.client(
+        's3',
+        aws_access_key_id=aws_access_key_id,
+        aws_secret_access_key=aws_secret_access_key,
+        region_name=aws_region
+    )
 
 def generate_and_store_qr_codes():
 
