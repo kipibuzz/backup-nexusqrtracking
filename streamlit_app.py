@@ -39,11 +39,11 @@ def generate_and_store_qr_codes():
     cursor.execute("SELECT ATTENDEE_ID, QR_CODE FROM EMP")
     employee_data = cursor.fetchall()
 
-    new_qr_codes_generated = 0
+    # new_qr_codes_generated = 0
 
    # def generate_and_store_qr_codes():
    #  # ... (other code)
-  new_qr_codes_generated = 0  # Initialize the counter
+    new_qr_codes_generated = 0  # Initialize the counter
 
     for attendee_id, qr_code in employee_data:
         if qr_code:
