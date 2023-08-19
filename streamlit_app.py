@@ -143,7 +143,7 @@ if st.button('Generate QR Codes'):
             st.warning("QR codes could not be generated. Please check for any issues.")
 
 # QR code scanner page
-elif menu_choice == menu_choices["QR Code Scanner"]:
+if menu_choice == menu_choices["QR Code Scanner"]:
     st.header('QR Code Scanner')
 
     image = st.camera_input("Show QR code")
@@ -156,7 +156,8 @@ elif menu_choice == menu_choices["QR Code Scanner"]:
 
         for obj in decoded_objects:
             qr_data = obj.data.decode('utf-8')
-            
+            st.write(f"QR Code Data: {qr_data}")
+
             # Check if the scanned QR code exists in the S3 bucket (valid QR code)
             s3_file_name = f'qrcodes/{qr_data}.png'
             try:
@@ -166,6 +167,7 @@ elif menu_choice == menu_choices["QR Code Scanner"]:
                         st.error("QR code already scanned and attendee marked.")
                     else:
                         attendance_status[qr_data] = True
+                        mark_attendance(qr_data)  # Mark attendee as attended
                         st.success("QR code scanned successfully. Attendee marked as attended.")
                 else:
                     st.warning("QR code scanned, but attendee not registered for the event.")
@@ -174,7 +176,6 @@ elif menu_choice == menu_choices["QR Code Scanner"]:
                     st.error("Invalid QR code. Please try again.")
                 else:
                     st.warning("An error occurred while processing the QR code.")
-
 
 # elif menu_choice == menu_choices["Attendance Statistics"]:
 #     # Attendance statistics page
