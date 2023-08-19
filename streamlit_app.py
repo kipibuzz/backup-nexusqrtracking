@@ -41,8 +41,8 @@ def generate_and_store_qr_codes():
 
     new_qr_codes_generated = 0
 
-   def generate_and_store_qr_codes():
-    # ... (other code)
+   # def generate_and_store_qr_codes():
+   #  # ... (other code)
 
     for attendee_id, qr_code in employee_data:
         if qr_code:
