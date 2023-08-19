@@ -48,6 +48,7 @@ def generate_and_store_qr_codes():
         schema=CONNECTION_PARAMETERS['schema']
     )
     cursor = conn.cursor()
+    
 
     # Fetch attendee IDs from the EMP table
     cursor.execute("SELECT ATTENDEE_ID, QR_CODE FROM EMP")
@@ -95,7 +96,15 @@ def generate_and_store_qr_codes():
         
         new_qr_codes_generated += 1  # Increment the counter
 
+            # Update attendance status
+    update_query = "UPDATE EMP SET ATTENDED = TRUE WHERE ATTENDEE_ID = %s"
+    cursor.execute(update_query, (attendee_id,))
+    conn.commit()
+
+    # Close the cursor and connection
+    cursor.close()
     conn.close()
+ 
 
     return new_qr_codes_generated
 
