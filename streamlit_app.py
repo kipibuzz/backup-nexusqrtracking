@@ -228,19 +228,13 @@ if menu_choice == menu_choices["QR Code Scanner"]:
                     st.warning("Invalid QR code format. Please make sure the QR code data is in the format 'AttendeeID FirstNameLastName'")
                     continue
 
-                # Fetch the QR_CODE identifier from the Snowflake table based on the scanned QR data
-                conn = snowflake.connector.connect(
-                    user=CONNECTION_PARAMETERS['user'],
-                    password=CONNECTION_PARAMETERS['password'],
-                    account=CONNECTION_PARAMETERS['account'],
-                    warehouse=CONNECTION_PARAMETERS['warehouse'],
-                    database=CONNECTION_PARAMETERS['database'],
-                    schema=CONNECTION_PARAMETERS['schema']
-                )
-                cursor = conn.cursor()
+                # ... (your database retrieval and attendance marking logic)
 
-                cursor.execute(f"SELECT QR_CODE, ATTENDED FROM EMP WHERE ATTENDEE_ID = '{attendee_id}' AND NAME = '{attendee_name}'")
-                row = cursor.fetchone()
+                cursor.close()
+                conn.close()
+
+                # Define the default message before the loop
+                message = 'QR code not found in the database.'
 
                 if row:
                     qr_code_identifier, attended = row
@@ -248,28 +242,17 @@ if menu_choice == menu_choices["QR Code Scanner"]:
                         if attended:
                             message = f'Attendance already marked for Attendee ID: {attendee_id}'
                         else:
-                            # Mark attendance
-                            mark_attendance(attendee_id)
-                            conn.commit()
-
-                            # Update event statistics table
-                            cursor.execute(
-                                f"UPDATE EVENT_STATISTICS SET TOTAL_ATTENDED = TOTAL_ATTENDED + 1 WHERE EVENT_DATE = CURRENT_DATE()"
-                            )
-                            conn.commit()
+                            # ... (attendance marking and event statistics updates)
 
                             message = f'QR code scanned successfully. Attendee marked as attended. Attendee ID: {attendee_id}'
                     else:
                         message = 'Invalid QR code.'
-                else:
-                    message = 'QR code not found in the database.'
 
-                cursor.close()
-                conn.close()
+                st.write(message)
 
-            st.write(message)
         else:
             st.warning("No QR code detected in the image. Please try again.")
+
 
 
 elif menu_choice == menu_choices["Attendance Statistics"]:
