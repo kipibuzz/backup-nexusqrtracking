@@ -136,6 +136,25 @@ def mark_attendance(attendee_id):
     cursor.close()
     conn.close()
 
+def query_attendance_data():
+    conn = snowflake.connector.connect(
+        user=CONNECTION_PARAMETERS['user'],
+        password=CONNECTION_PARAMETERS['password'],
+        account=CONNECTION_PARAMETERS['account'],
+        warehouse=CONNECTION_PARAMETERS['warehouse'],
+        database=CONNECTION_PARAMETERS['database'],
+        schema=CONNECTION_PARAMETERS['schema']
+    )
+    cursor = conn.cursor()
+
+    # Query attendance data
+    cursor.execute("SELECT ATTENDEE_ID, ATTENDED FROM EMP")
+    data = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+    return data
+
 
 # Function to generate attendance statistics
 def generate_attendance_statistics(data):
