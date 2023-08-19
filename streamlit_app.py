@@ -199,7 +199,7 @@ st.markdown(
         }}
     </style>
     """,
-    unsafe_allow_html=True,
+    unsafe_allow_html=True,)
 
 if menu_choice == menu_choices["QR Code Scanner"]:
     st.header('QR Code Scanner')
