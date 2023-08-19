@@ -20,3 +20,4 @@ qrcode
 Pillow
 streamlit
 web3
+boto3
