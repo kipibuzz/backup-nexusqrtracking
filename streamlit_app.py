@@ -68,15 +68,15 @@ def generate_and_store_qr_codes():
         # Upload QR code image to S3 stage
         s3_path = f'qrcodes/{attendee_id}.png'
         cursor.execute(
-            f"COPY INTO @s3_stage/{s3_path} FROM :1",
-            [qr_byte_data]
+            "COPY INTO @s3_stage/{s3_path} FROM :qr_byte_data",
+            {"s3_path": s3_path, "qr_byte_data": qr_byte_data}
         )
         
         # Update QR_CODE column with S3 file path
-        s3_file_path = f's3://qrstore/{s3_path}' 
+        s3_file_path = f's3://qrstore/{s3_path}'
         cursor.execute(
-            "UPDATE EMP SET QR_CODE = %s WHERE ATTENDEE_ID = %s",
-            (s3_file_path, attendee_id)
+            "UPDATE EMP SET QR_CODE = :s3_file_path WHERE ATTENDEE_ID = :attendee_id",
+            {"s3_file_path": s3_file_path, "attendee_id": attendee_id}
         )
         conn.commit()
         
