@@ -171,9 +171,12 @@ if menu_choice == menu_choices["QR Code Scanner"]:
 
         decoded_objects = decode(cv2_img)
 
-        for obj in decoded_objects:
-            qr_data = obj.data.decode('utf-8')
-            st.write(f"QR Code Data: {qr_data}")
+       for obj in decoded_objects:
+           qr_data = obj.data.decode('utf-8')
+           print(f"Scanned QR Code Data: {qr_data}")  # Add this line
+           st.write(f"QR Code Data: {qr_data}")
+    # Rest of the logic
+
 
             # Check if the scanned QR code exists in the S3 bucket (valid QR code)
             s3_file_name = f'qrcodes/{qr_data}.png'
