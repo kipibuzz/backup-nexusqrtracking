@@ -21,6 +21,10 @@ CONNECTION_PARAMETERS = {
 }
 
 def generate_and_store_qr_codes():
+
+    aws_access_key_id = st.secrets['access_key']
+    aws_secret_access_key = st.secrets['secret_key']
+    aws_region = st.secrets['region']
     conn = snowflake.connector.connect(
         user=CONNECTION_PARAMETERS['user'],
         password=CONNECTION_PARAMETERS['password'],
