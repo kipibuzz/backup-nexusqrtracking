@@ -68,22 +68,18 @@ def generate_and_store_qr_codes():
 
         # Upload QR code image to S3 stage
         s3_path = f'qrcodes/{attendee_id}.png'
-        cursor.execute(
-            "COPY INTO @s3_stage/%s FROM :1",
-            [s3_path, qr_byte_data]
-        )
-        
+        copy_query = f"COPY INTO @s3_stage/{s3_path} FROM ?"
+        cursor.execute(copy_query, (qr_byte_data,))
+
         # Update QR_CODE column with S3 file path
         s3_file_path = f's3://qrstore/{s3_path}'
-        cursor.execute(
-            "UPDATE EMP SET QR_CODE = %s WHERE ATTENDEE_ID = %s",
-            (s3_file_path, attendee_id)
-        )
+        update_query = "UPDATE EMP SET QR_CODE = ? WHERE ATTENDEE_ID = ?"
+        cursor.execute(update_query, (s3_file_path, attendee_id))
         conn.commit()
-        
+
         new_qr_codes_generated += 1  # Increment the counter
 
-    return new_qr_codes_generated 
+    return new_qr_codes_generated
     
 # Function to generate attendance statistics
 def generate_attendance_statistics(data):
