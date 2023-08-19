@@ -20,10 +20,12 @@ CONNECTION_PARAMETERS = {
     "warehouse": st.secrets['warehouse'],
 }
 
+# Retrieve secrets
 aws_access_key_id = st.secrets['access_key']
 aws_secret_access_key = st.secrets['secret_key']
-aws_region = st.secrets['region']
+aws_region = st.secrets['region']  # Make sure this is in the correct format like 'us-east-1'
 
+# Create an S3 client using the retrieved secrets
 s3 = boto3.client(
     's3',
     aws_access_key_id=aws_access_key_id,
@@ -31,7 +33,6 @@ s3 = boto3.client(
     region_name=aws_region
 )
 
-s3 = session.create_client('s3')
 # Directory to save QR code images
 
 def generate_and_store_qr_codes():
