@@ -20,4 +20,4 @@ qrcode
 Pillow
 streamlit
 web3
-boto3
+boto3==1.18.107
