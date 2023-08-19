@@ -192,74 +192,74 @@ if st.button("Generate QR Codes"):
         st.warning("QR codes could not be generated. Please check for any issues.")
 
 # QR code scanner page
-if menu_choice == menu_choices["QR Code Scanner"]:
+elif menu_choice == menu_choices["QR Code Scanner"]:
+    # QR Code Scanner logic
     st.header('QR Code Scanner')
 
-       # Add a button to start scanning
+    # Add a button to start scanning
     start_scanning = st.button("Start Scanning")
 
     if start_scanning:
         # Display the camera feed
         image = st.camera_input("Show QR code", use_container_width=True, height=450)
         if image is not None:
-        bytes_data = image.getvalue()
-        cv2_img = cv2.imdecode(np.frombuffer(bytes_data, np.uint8), cv2.IMREAD_COLOR)
+            bytes_data = image.getvalue()
+            cv2_img = cv2.imdecode(np.frombuffer(bytes_data, np.uint8), cv2.IMREAD_COLOR)
 
-        decoded_objects = decode(cv2_img)
+            decoded_objects = decode(cv2_img)
 
-        for obj in decoded_objects:
-            qr_data = obj.data.decode('utf-8')
-            st.write(f"QR Code Data: {qr_data}")
+            for obj in decoded_objects:
+                qr_data = obj.data.decode('utf-8')
+                st.write(f"QR Code Data: {qr_data}")
 
-            # Split the QR data into attendee ID and name using only the first space
-            qr_parts = qr_data.split(" ", 1)
-            if len(qr_parts) == 2:
-                attendee_id, attendee_name = qr_parts
-            else:
-                st.warning("Invalid QR code format. Please make sure the QR code data is in the format 'AttendeeID FirstNameLastName'")
-                continue
-
-            # Fetch the QR_CODE identifier from the Snowflake table based on the scanned QR data
-            conn = snowflake.connector.connect(
-                user=CONNECTION_PARAMETERS['user'],
-                password=CONNECTION_PARAMETERS['password'],
-                account=CONNECTION_PARAMETERS['account'],
-                warehouse=CONNECTION_PARAMETERS['warehouse'],
-                database=CONNECTION_PARAMETERS['database'],
-                schema=CONNECTION_PARAMETERS['schema']
-            )
-            cursor = conn.cursor()
-
-            cursor.execute(f"SELECT QR_CODE, ATTENDED FROM EMP WHERE ATTENDEE_ID = '{attendee_id}' AND NAME = '{attendee_name}'")
-            row = cursor.fetchone()
-
-            if row:
-                qr_code_identifier, attended = row
-                if qr_code_identifier:
-                    if attended:
-                        message = f'Attendance already marked for Attendee ID: {attendee_id}'
-                    else:
-                        # Mark attendance
-                        mark_attendance(attendee_id)
-                        conn.commit()
-
-                        # Update event statistics table
-                        cursor.execute(
-                            f"UPDATE EVENT_STATISTICS SET TOTAL_ATTENDED = TOTAL_ATTENDED + 1 WHERE EVENT_DATE = CURRENT_DATE()"
-                        )
-                        conn.commit()
-
-                        message = f'QR code scanned successfully. Attendee marked as attended. Attendee ID: {attendee_id}'
+                # Split the QR data into attendee ID and name using only the first space
+                qr_parts = qr_data.split(" ", 1)
+                if len(qr_parts) == 2:
+                    attendee_id, attendee_name = qr_parts
                 else:
-                    message = 'Invalid QR code.'
-            else:
-                message = 'QR code not found in the database.'
+                    st.warning("Invalid QR code format. Please make sure the QR code data is in the format 'AttendeeID FirstNameLastName'")
+                    continue
 
-            cursor.close()
-            conn.close()
+                # Fetch the QR_CODE identifier from the Snowflake table based on the scanned QR data
+                conn = snowflake.connector.connect(
+                    user=CONNECTION_PARAMETERS['user'],
+                    password=CONNECTION_PARAMETERS['password'],
+                    account=CONNECTION_PARAMETERS['account'],
+                    warehouse=CONNECTION_PARAMETERS['warehouse'],
+                    database=CONNECTION_PARAMETERS['database'],
+                    schema=CONNECTION_PARAMETERS['schema']
+                )
+                cursor = conn.cursor()
 
-        st.write(message)  # Display the message after processing the QR code
+                cursor.execute(f"SELECT QR_CODE, ATTENDED FROM EMP WHERE ATTENDEE_ID = '{attendee_id}' AND NAME = '{attendee_name}'")
+                row = cursor.fetchone()
 
+                if row:
+                    qr_code_identifier, attended = row
+                    if qr_code_identifier:
+                        if attended:
+                            message = f'Attendance already marked for Attendee ID: {attendee_id}'
+                        else:
+                            # Mark attendance
+                            mark_attendance(attendee_id)
+                            conn.commit()
+
+                            # Update event statistics table
+                            cursor.execute(
+                                f"UPDATE EVENT_STATISTICS SET TOTAL_ATTENDED = TOTAL_ATTENDED + 1 WHERE EVENT_DATE = CURRENT_DATE()"
+                            )
+                            conn.commit()
+
+                            message = f'QR code scanned successfully. Attendee marked as attended. Attendee ID: {attendee_id}'
+                    else:
+                        message = 'Invalid QR code.'
+                else:
+                    message = 'QR code not found in the database.'
+
+                cursor.close()
+                conn.close()
+
+            st.write(message)  # D
 
 
 
