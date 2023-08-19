@@ -316,8 +316,8 @@ elif menu_choice == menu_choices["Attendance Statistics"]:
     # Display the pie chart
     st.pyplot(plt)
 
-elif menu_choice == menu_choices["Create QR Codes"]:
-    st.header("Create QR Codes")
+elif menu_choice == menu_choices["Generate QR Codes"]:
+    st.header("Generate QR Codes")
     st.write("Click the button below to generate QR codes for attendees.")
 
     if st.button("Generate QR Codes"):
