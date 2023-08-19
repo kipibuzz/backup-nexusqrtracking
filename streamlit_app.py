@@ -245,47 +245,44 @@ if menu_choice == menu_choices["QR Code Scanner"]:
                     # ... (rest of your processing logic)
                     
 
-                # Fetch the QR_CODE identifier from the Snowflake table based on the scanned QR data
-                conn = snowflake.connector.connect(
-                    user=CONNECTION_PARAMETERS['user'],
-                    password=CONNECTION_PARAMETERS['password'],
-                    account=CONNECTION_PARAMETERS['account'],
-                    warehouse=CONNECTION_PARAMETERS['warehouse'],
-                    database=CONNECTION_PARAMETERS['database'],
-                    schema=CONNECTION_PARAMETERS['schema']
-                )
-                cursor = conn.cursor()
+                    # Fetch the QR_CODE identifier from the Snowflake table based on the scanned QR data
+                        conn = snowflake.connector.connect(
+                        user=CONNECTION_PARAMETERS['user'],
+                        password=CONNECTION_PARAMETERS['password'],
+                        account=CONNECTION_PARAMETERS['account'],
+                        warehouse=CONNECTION_PARAMETERS['warehouse'],
+                        database=CONNECTION_PARAMETERS['database'],
+                        schema=CONNECTION_PARAMETERS['schema']
+                    )
+                    cursor = conn.cursor()
 
-                cursor.execute(f"SELECT QR_CODE, ATTENDED FROM EMP WHERE ATTENDEE_ID = '{attendee_id}' AND NAME = '{attendee_name}'")
-                row = cursor.fetchone()
+                    cursor.execute(f"SELECT QR_CODE, ATTENDED FROM EMP WHERE ATTENDEE_ID = '{attendee_id}' AND NAME = '{attendee_name}'")
+                    row = cursor.fetchone()
 
-                if row:
-                    qr_code_identifier, attended = row
-                    if qr_code_identifier:
-                        if attended:
-                            message = f'Attendance already marked for Attendee ID: {attendee_id}'
-                        else:
+                    if row:
+                        qr_code_identifier, attended = row
+                        if qr_code_identifier:
+                           if attended:
+                               message = f'Attendance already marked for Attendee ID: {attendee_id}'
+                            else:
                             # Mark attendance
-                            mark_attendance(attendee_id)
-                            conn.commit()
+                                 mark_attendance(attendee_id)
+                                 conn.commit()
 
                             # Update event statistics table
-                            cursor.execute(
-                                f"UPDATE EVENT_STATISTICS SET TOTAL_ATTENDED = TOTAL_ATTENDED + 1 WHERE EVENT_DATE = CURRENT_DATE()"
-                            )
-                            conn.commit()
+                                cursor.execute(
+                                    f"UPDATE EVENT_STATISTICS SET TOTAL_ATTENDED = TOTAL_ATTENDED + 1 WHERE EVENT_DATE = CURRENT_DATE()"
+                                )
+                                conn.commit()
 
-                            message = f'QR code scanned successfully. Attendee marked as attended. Attendee ID: {attendee_id}'
+                                message = f'QR code scanned successfully. Attendee marked as attended. Attendee ID: {attendee_id}'
+                        else:
+                            message = 'Invalid QR code.'
                     else:
-                        message = 'Invalid QR code.'
-                else:
-                    message = 'QR code not found in the database.'
-                    st.write(message)  # D
+                        message = 'QR code not found in the database.'
 
                 cursor.close()
                 conn.close()
-
-             
 
 
 
