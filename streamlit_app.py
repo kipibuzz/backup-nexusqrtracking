@@ -236,6 +236,7 @@ if menu_choice == menu_choices["QR Code Scanner"]:
 
 
 
+
 # elif menu_choice == menu_choices["Attendance Statistics"]:
 #     # Attendance statistics page
 #     st.header('Attendance Statistics')
