@@ -24,7 +24,9 @@ CONNECTION_PARAMETERS = {
     "schema": st.secrets['schema'],
     "warehouse": st.secrets['warehouse'],
 }
-
+aws_access_key_id = st.secrets['access_key']
+aws_secret_access_key = st.secrets['secret_key']
+aws_region = st.secrets['region']
 s3 = boto3.client(
         's3',
         aws_access_key_id=aws_access_key_id,
