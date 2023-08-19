@@ -227,14 +227,14 @@ if menu_choice == menu_choices["QR Code Scanner"]:
                     continue
 
                 # ... (your database retrieval and attendance marking logic)
-                if len(qr_parts) == 2:  # Only display QR data when format is valid
-                    st.write(f"QR Code Data: {qr_data}")
+                
                 cursor.close()
                 conn.close()
 
                 # Define the default message before the loop
                 message = 'QR code not found in the database.'
-              
+                if len(qr_parts) == 2:  # Only display QR data when format is valid
+                    st.write(f"QR Code Data: {qr_data}")
                 if row:
                     qr_code_identifier, attended = row
                     if qr_code_identifier:
