@@ -204,7 +204,7 @@ for obj in decoded_objects:
 #     # Attendance statistics page
 #     st.header('Attendance Statistics')
 #     # ... (rest of your code for attendance statistics)
-           
+
 elif menu_choice == menu_choices["Attendance Statistics"]:
     # Attendance statistics page
     st.header('Attendance Statistics')
