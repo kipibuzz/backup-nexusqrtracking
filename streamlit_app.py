@@ -218,8 +218,6 @@ if menu_choice == menu_choices["QR Code Scanner"]:
         if decoded_objects:
             for obj in decoded_objects:
                 qr_data = obj.data.decode('utf-8')
-                st.write(f"QR Code Data: {qr_data}")
-
                 # Split the QR data into attendee ID and name using only the first space
                 qr_parts = qr_data.split(" ", 1)
                 if len(qr_parts) == 2:
@@ -235,7 +233,8 @@ if menu_choice == menu_choices["QR Code Scanner"]:
 
                 # Define the default message before the loop
                 message = 'QR code not found in the database.'
-
+                if len(qr_parts) == 2:  # Only display QR data when format is valid
+                    st.write(f"QR Code Data: {qr_data}")
                 if row:
                     qr_code_identifier, attended = row
                     if qr_code_identifier:
