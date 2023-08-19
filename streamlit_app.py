@@ -8,6 +8,7 @@ import qrcode
 import os
 import io
 import tempfile
+import boto3
 
 # Snowflake connection parameters
 CONNECTION_PARAMETERS = {
@@ -48,6 +49,7 @@ def generate_and_store_qr_codes():
 
   
 
+    s3 = boto3.client('s3')
 
     for attendee_id, qr_code in employee_data:
         if qr_code:
@@ -66,19 +68,16 @@ def generate_and_store_qr_codes():
         # Save QR code image as temporary file
         with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as temp_file:
             qr_img.save(temp_file, format="PNG")
-        
-        # Upload QR code image to S3 stage
+
+        # Upload QR code image to S3 bucket
         s3_file_name = f'qrcodes/{attendee_id}.png'
-        copy_query = f"COPY INTO @s3_stage " \
-                     f"FROM @{temp_file.name} " \
-                     f"FILE_FORMAT = (TYPE = 'CSV' PATTERN = '{s3_file_name}')"
-        cursor.execute(copy_query)
+        s3.upload_file(temp_file.name, 'your-s3-bucket-name', s3_file_name)
 
         # Clean up temporary file
         os.unlink(temp_file.name)
 
         # Update QR_CODE column with S3 file path
-        s3_file_path = f's3://qrstore/{s3_file_name}'
+        s3_file_path = f's3://your-s3-bucket-name/{s3_file_name}'
         update_query = "UPDATE EMP SET QR_CODE = %s WHERE ATTENDEE_ID = %s"
         cursor.execute(update_query, (s3_file_path, attendee_id))
         conn.commit()
