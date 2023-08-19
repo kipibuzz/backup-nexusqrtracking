@@ -225,7 +225,7 @@ if menu_choice == menu_choices["QR Code Scanner"]:
                 if len(qr_parts) == 2:
                     attendee_id, attendee_name = qr_parts
                 else:
-                    st.warning("Invalid QR code format. Please make sure the QR code data is in the format 'AttendeeID FirstNameLastName'")
+                    st.warning("Invalid QR code")
                     continue
 
                 # ... (your database retrieval and attendance marking logic)
