@@ -280,12 +280,12 @@ if menu_choice == menu_choices["QR Code Scanner"]:
                         message = 'Invalid QR code.'
                 else:
                     message = 'QR code not found in the database.'
+                    st.write(message)  # D
 
                 cursor.close()
                 conn.close()
 
-            st.write(message)  # D
-
+             
 
 
 
