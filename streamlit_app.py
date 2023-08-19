@@ -278,10 +278,10 @@ if menu_choice == menu_choices["QR Code Scanner"]:
                     else:
                         message = 'QR code not found in the database.'
 
-                    cursor.close()
-                    conn.close()
+                        cursor.close()
+                        conn.close()
 
-                    st.write(message)  # Display the message after processing the QR code
+                        st.write(message)  # Display the message after processing the QR code
 
 
 
