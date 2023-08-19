@@ -75,8 +75,8 @@ def generate_and_store_qr_codes():
         # Update QR_CODE column with S3 file path
         s3_file_path = f's3://qrstore/{s3_path}'
         cursor.execute(
-            f"UPDATE EMP SET QR_CODE = %s WHERE ATTENDEE_ID = %s",
-            [s3_file_path, attendee_id]
+            "UPDATE EMP SET QR_CODE = %s WHERE ATTENDEE_ID = %s",
+            (s3_file_path, attendee_id)
         )
         conn.commit()
         
