@@ -103,24 +103,31 @@ def generate_and_store_qr_codes():
 
 def mark_attendance(attendee_id):
     conn = snowflake.connector.connect(
-        user=CONNECTION_PARAMETERS["user"],
-        password=CONNECTION_PARAMETERS["password"],
-        account=CONNECTION_PARAMETERS["account"],
-        warehouse=CONNECTION_PARAMETERS["warehouse"],
-        database=CONNECTION_PARAMETERS["database"],
-        schema=CONNECTION_PARAMETERS["schema"],
+        user=CONNECTION_PARAMETERS['user'],
+        password=CONNECTION_PARAMETERS['password'],
+        account=CONNECTION_PARAMETERS['account'],
+        warehouse=CONNECTION_PARAMETERS['warehouse'],
+        database=CONNECTION_PARAMETERS['database'],
+        schema=CONNECTION_PARAMETERS['schema']
     )
     cursor = conn.cursor()
+
+    print(f"Marking attendance for attendee ID: {attendee_id}")  # Debug print
 
     # Update attendance status
     update_query = "UPDATE EMP SET ATTENDED = TRUE WHERE ATTENDEE_ID = %s"
     try:
         cursor.execute(update_query, (attendee_id,))
         conn.commit()
-        st.success("Attendance marked successfully.")
+        print("Attendance marked successfully.")  # Debug print
     except Exception as e:
-        st.error(f"Error while marking attendance: {e}")
+        print(f"Error while marking attendance: {e}")  # Debug print
         conn.rollback()
+
+    # Close the cursor and connection
+    cursor.close()
+    conn.close()
+
 
     # Close the cursor and connection
     cursor.close()
