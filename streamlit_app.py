@@ -7,6 +7,7 @@ from pyzbar.pyzbar import decode
 import qrcode
 import os
 import io
+import tempfile
 
 # Snowflake connection parameters
 CONNECTION_PARAMETERS = {
