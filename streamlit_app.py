@@ -209,9 +209,8 @@ st.markdown(
 # QR code scanner page
 if menu_choice == menu_choices["QR Code Scanner"]:
     st.header('QR Code Scanner')
-    st.write("Use the camera input below to scan QR codes.")
 
-    image = st.camera_input("Show QR code", key="camera_input", label_visibility="hidden")
+    image = st.camera_input("Show QR code")
 
     if image is not None:
         bytes_data = image.getvalue()
@@ -270,9 +269,7 @@ if menu_choice == menu_choices["QR Code Scanner"]:
             cursor.close()
             conn.close()
 
-        st.write(message)  # Display the message after processing the QR code
-
-# ... (rest of your code)
+        st.write(message)
 
 
 elif menu_choice == menu_choices["Attendance Statistics"]:
