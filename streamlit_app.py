@@ -48,6 +48,7 @@ def generate_and_store_qr_codes():
 
   
 
+
     for attendee_id, qr_code in employee_data:
         if qr_code:
             continue
@@ -68,9 +69,9 @@ def generate_and_store_qr_codes():
         
         # Upload QR code image to S3 stage
         s3_file_name = f'qrcodes/{attendee_id}.png'
-        copy_query = f"COPY INTO @s3_stage FROM {temp_file.name} " \
-                     f"FILE_FORMAT = (TYPE = 'CSV' FIELD_OPTIONALLY_ENCLOSED_BY = '' SKIP_HEADER = 1) " \
-                     f"PATTERN = '{s3_file_name}'"
+        copy_query = f"COPY INTO @s3_stage FILE_FORMAT = (TYPE = 'CSV') " \
+                     f"PATTERN = '{s3_file_name}' " \
+                     f"FROM @{temp_file.name}"
         cursor.execute(copy_query)
 
         # Clean up temporary file
@@ -85,6 +86,7 @@ def generate_and_store_qr_codes():
         new_qr_codes_generated += 1  # Increment the counter
 
     return new_qr_codes_generated
+
     
 # Function to generate attendance statistics
 def generate_attendance_statistics(data):
