@@ -171,6 +171,7 @@ if st.button("Generate QR Codes"):
 
 # QR code scanner page
 # QR code scanner page
+# QR code scanner page
 if menu_choice == menu_choices["QR Code Scanner"]:
     st.header('QR Code Scanner')
 
@@ -184,29 +185,45 @@ if menu_choice == menu_choices["QR Code Scanner"]:
 
         for obj in decoded_objects:
             qr_data = obj.data.decode('utf-8')
-            print(f"Scanned QR Code Data: {qr_data}")  # Print scanned QR code data
             st.write(f"QR Code Data: {qr_data}")
 
-            # Check if the scanned QR code exists in the S3 bucket (valid QR code)
-            s3_file_name = f"qrcodes/{qr_data}.png"
-            try:
-                s3.head_object(Bucket="qrstore", Key=s3_file_name)
+            # Fetch the QR_CODE identifier from the Snowflake table based on the scanned QR data
+            conn = snowflake.connector.connect(
+                user=CONNECTION_PARAMETERS['user'],
+                password=CONNECTION_PARAMETERS['password'],
+                account=CONNECTION_PARAMETERS['account'],
+                warehouse=CONNECTION_PARAMETERS['warehouse'],
+                database=CONNECTION_PARAMETERS['database'],
+                schema=CONNECTION_PARAMETERS['schema']
+            )
+            cursor = conn.cursor()
 
-                if qr_data in attendance_status:
-                    if attendance_status[qr_data]:
-                        st.warning("QR code already scanned and attendee marked.")
-                    else:
-                        attendance_status[qr_data] = True
+            cursor.execute(f"SELECT QR_CODE, ATTENDED FROM EMP WHERE QR_CODE = '{qr_data}'")
+            row = cursor.fetchone()
+            
+            if row:
+                qr_code_identifier, attended = row
+                if qr_code_identifier:
+                    # Check if the file exists in the Snowflake stage (S3)
+                    stage_name = 's3_stage'  # Replace with your actual stage name
+                    s3_file_path = f's3://{stage_name}/{qr_code_identifier}'
+                    
+                    try:
+                        cursor.execute(f"COPY INTO @stagename FROM {s3_file_path} FILES=({qr_code_identifier})")
+                        conn.commit()
                         mark_attendance(qr_data)  # Mark attendee as attended
                         st.success("QR code scanned successfully. Attendee marked as attended.")
+                    except Exception as e:
+                        st.warning("QR code found in the database, but an error occurred while processing the QR code.")
+                        print(e)
                 else:
-                    st.warning("QR code scanned, but attendee not registered for the event.")
+                    st.warning("Invalid QR code.")
+            else:
+                st.warning("QR code not found in the database.")
 
-            except botocore.exceptions.ClientError as e:
-                if e.response["Error"]["Code"] == "404":
-                    st.error("Invalid QR code. Please try again.")
-                else:
-                    st.warning("An error occurred while processing the QR code.")
+            cursor.close()
+            conn.close()
+
 
 # elif menu_choice == menu_choices["Attendance Statistics"]:
 #     # Attendance statistics page
