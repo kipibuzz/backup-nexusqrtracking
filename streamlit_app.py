@@ -192,33 +192,58 @@ if st.button("Generate QR Codes"):
         st.warning("QR codes could not be generated. Please check for any issues.")
 
 # QR code scanner page
-elif menu_choice == menu_choices["QR Code Scanner"]:
-    # QR Code Scanner logic
+if menu_choice == menu_choices["QR Code Scanner"]:
     st.header('QR Code Scanner')
 
     # Add a button to start scanning
     start_scanning = st.button("Start Scanning")
 
     if start_scanning:
+        st.subheader("QR Code Scanner")
+
+        # Apply custom CSS to style the camera feed
+        st.markdown(
+            """
+            <style>
+            .qr-camera-container {
+                position: relative;
+                width: 100%;
+                padding-bottom: 100%; /* 1:1 aspect ratio */
+                overflow: hidden;
+            }
+            .qr-camera {
+                position: absolute;
+                width: 100%;
+                height: 100%;
+            }
+            </style>
+            """,
+            unsafe_allow_html=True,
+        )
+
         # Display the camera feed
-        image = st.camera_input("Show QR code", height=450)
-        if image is not None:
-            bytes_data = image.getvalue()
-            cv2_img = cv2.imdecode(np.frombuffer(bytes_data, np.uint8), cv2.IMREAD_COLOR)
+        with st.markdown("<div class='qr-camera-container'><img class='qr-camera' src='/media/qr_camera' /></div>", unsafe_allow_html=True):
+            image = st.camera_input("Show QR code", key="qr_camera")
+            if image is not None:
+                bytes_data = image.getvalue()
+                cv2_img = cv2.imdecode(np.frombuffer(bytes_data, np.uint8), cv2.IMREAD_COLOR)
 
-            decoded_objects = decode(cv2_img)
+                decoded_objects = decode(cv2_img)
 
-            for obj in decoded_objects:
-                qr_data = obj.data.decode('utf-8')
-                st.write(f"QR Code Data: {qr_data}")
+                for obj in decoded_objects:
+                    qr_data = obj.data.decode('utf-8')
+                    st.write(f"QR Code Data: {qr_data}")
 
-                # Split the QR data into attendee ID and name using only the first space
-                qr_parts = qr_data.split(" ", 1)
-                if len(qr_parts) == 2:
-                    attendee_id, attendee_name = qr_parts
-                else:
-                    st.warning("Invalid QR code format. Please make sure the QR code data is in the format 'AttendeeID FirstNameLastName'")
-                    continue
+                    # Split the QR data into attendee ID and name using only the first space
+                    qr_parts = qr_data.split(" ", 1)
+                    if len(qr_parts) == 2:
+                        attendee_id, attendee_name = qr_parts
+                    else:
+                        st.warning("Invalid QR code format. Please make sure the QR code data is in the format 'AttendeeID FirstNameLastName'")
+                        continue
+
+                    # ... (rest of your processing logic)
+                    
 
                 # Fetch the QR_CODE identifier from the Snowflake table based on the scanned QR data
                 conn = snowflake.connector.connect(
