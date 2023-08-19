@@ -173,7 +173,6 @@ if st.button("Generate QR Codes"):
         st.warning("QR codes could not be generated. Please check for any issues.")
 
 # QR code scanner page
- 
 if menu_choice == menu_choices["QR Code Scanner"]:
     st.header('QR Code Scanner')
 
@@ -189,8 +188,13 @@ if menu_choice == menu_choices["QR Code Scanner"]:
             qr_data = obj.data.decode('utf-8')
             st.write(f"QR Code Data: {qr_data}")
 
-            # Split the QR data into attendee ID and name
-            attendee_id, attendee_name = qr_data.split(" ")
+            # Split the QR data into attendee ID and name using only the first space
+            qr_parts = qr_data.split(" ", 1)
+            if len(qr_parts) == 2:
+                attendee_id, attendee_name = qr_parts
+            else:
+                st.warning("Invalid QR code format. Please make sure the QR code data is in the format 'AttendeeID FirstNameLastName'")
+                continue
 
             # Fetch the QR_CODE identifier from the Snowflake table based on the scanned QR data
             conn = snowflake.connector.connect(
