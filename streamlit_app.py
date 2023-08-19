@@ -203,7 +203,7 @@ st.markdown(
 
 if menu_choice == menu_choices["QR Code Scanner"]:
     st.header('QR Code Scanner')
-   col1, col2 = st.beta_columns([1, 2])
+    col1, col2 = st.beta_columns([1, 2])
 
     # Display the camera feed from the back camera in the second column
     with col2:
