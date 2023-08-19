@@ -329,4 +329,4 @@ elif menu_choice == menu_choices["Create QR Codes"]:
         elif new_qr_codes_generated == 0:
             st.info("No new QR codes generated. QR codes already exist for all attendees.")
         else:
-            st.warning("QR codes could not be generated.
+            st.warning("QR codes could not be generated.")
