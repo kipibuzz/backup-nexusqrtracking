@@ -264,7 +264,7 @@ if menu_choice == menu_choices["QR Code Scanner"]:
                         if qr_code_identifier:
                            if attended:
                                message = f'Attendance already marked for Attendee ID: {attendee_id}'
-                            else:
+                             else:
                             # Mark attendance
                                  mark_attendance(attendee_id)
                                  conn.commit()
@@ -276,9 +276,9 @@ if menu_choice == menu_choices["QR Code Scanner"]:
                                 conn.commit()
 
                                 message = f'QR code scanned successfully. Attendee marked as attended. Attendee ID: {attendee_id}'
-                        else:
+                         else:
                             message = 'Invalid QR code.'
-                    else:
+                     else:
                         message = 'QR code not found in the database.'
 
                 cursor.close()
