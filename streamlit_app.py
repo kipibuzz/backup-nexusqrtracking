@@ -211,7 +211,7 @@ if menu_choice == menu_choices["QR Code Scanner"]:
     st.header('QR Code Scanner')
     st.write("Use the camera input below to scan QR codes.")
 
-    image = st.camera_input("Show QR code")
+    image = st.camera_input("Show QR code", key="camera_input", label_visibility="hidden")
 
     if image is not None:
         bytes_data = image.getvalue()
