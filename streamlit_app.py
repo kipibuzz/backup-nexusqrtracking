@@ -43,6 +43,7 @@ def generate_and_store_qr_codes():
 
    # def generate_and_store_qr_codes():
    #  # ... (other code)
+  new_qr_codes_generated = 0  # Initialize the counter
 
     for attendee_id, qr_code in employee_data:
         if qr_code:
@@ -79,7 +80,9 @@ def generate_and_store_qr_codes():
         )
         conn.commit()
         
-        new_qr_codes_generated += 1
+        new_qr_codes_generated += 1  # Increment the counter
+
+    return new_qr_codes_generated
     
 # Function to generate attendance statistics
 def generate_attendance_statistics(data):
