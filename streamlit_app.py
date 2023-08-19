@@ -172,6 +172,7 @@ if st.button("Generate QR Codes"):
 # QR code scanner page
 # QR code scanner page
 # QR code scanner page
+# QR code scanner page
 if menu_choice == menu_choices["QR Code Scanner"]:
     st.header('QR Code Scanner')
 
@@ -187,7 +188,7 @@ if menu_choice == menu_choices["QR Code Scanner"]:
             qr_data = obj.data.decode('utf-8')
             st.write(f"QR Code Data: {qr_data}")
 
-            # Fetch the QR_CODE identifier from the Snowflake table based on the scanned QR data
+            # Fetch the QR_CODE identifier from the Snowflake table based on the scanned QR data (Attendee ID)
             conn = snowflake.connector.connect(
                 user=CONNECTION_PARAMETERS['user'],
                 password=CONNECTION_PARAMETERS['password'],
@@ -198,24 +199,15 @@ if menu_choice == menu_choices["QR Code Scanner"]:
             )
             cursor = conn.cursor()
 
-            cursor.execute(f"SELECT QR_CODE, ATTENDED FROM EMP WHERE QR_CODE = '{qr_data}'")
+            cursor.execute(f"SELECT QR_CODE, ATTENDED FROM EMP WHERE ATTENDEE_ID = '{qr_data}'")
             row = cursor.fetchone()
             
             if row:
                 qr_code_identifier, attended = row
                 if qr_code_identifier:
-                    # Check if the file exists in the Snowflake stage (S3)
-                    stage_name = 's3_stage'  # Replace with your actual stage name
-                    s3_file_path = f's3://{stage_name}/{qr_code_identifier}'
-                    
-                    try:
-                        cursor.execute(f"COPY INTO @stagename FROM {s3_file_path} FILES=({qr_code_identifier})")
-                        conn.commit()
-                        mark_attendance(qr_data)  # Mark attendee as attended
-                        st.success("QR code scanned successfully. Attendee marked as attended.")
-                    except Exception as e:
-                        st.warning("QR code found in the database, but an error occurred while processing the QR code.")
-                        print(e)
+                    # Mark attendance as attended
+                    mark_attendance(qr_data)
+                    st.success("QR code scanned successfully. Attendee marked as attended.")
                 else:
                     st.warning("Invalid QR code.")
             else:
