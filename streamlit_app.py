@@ -200,17 +200,6 @@ st.markdown(
     </style>
     """,
     unsafe_allow_html=True,
-)
-
-
-# QR code scanner page
-# ... (your existing imports and functions)
-
-# QR code scanner page
-if menu_choice == menu_choices["QR Code Scanner"]:
-    st.header('QR Code Scanner')
-
-    image = st.camera_input("Show QR code")
 
 if menu_choice == menu_choices["QR Code Scanner"]:
     st.header('QR Code Scanner')
