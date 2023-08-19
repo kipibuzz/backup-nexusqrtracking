@@ -50,8 +50,8 @@ def generate_and_store_qr_codes():
     )
     cursor = conn.cursor()
 
-    # Fetch attendee IDs from the EMP table
-    cursor.execute("SELECT ATTENDEE_ID, QR_CODE FROM EMP")
+    # Fetch attendee IDs and names from the EMP table
+    cursor.execute("SELECT ATTENDEE_ID, NAME, QR_CODE FROM EMP")
     employee_data = cursor.fetchall()
 
     new_qr_codes_generated = 0  # Initialize the counter
@@ -63,9 +63,11 @@ def generate_and_store_qr_codes():
         region_name=aws_region,
     )
 
-    for attendee_id, qr_code in employee_data:
+    for attendee_id, name, qr_code in employee_data:
         if qr_code:
             continue
+
+        qr_data = f"{attendee_id} {name}"  # Combine ID and name in QR code data
 
         qr = qrcode.QRCode(
             version=1,
@@ -73,7 +75,7 @@ def generate_and_store_qr_codes():
             box_size=10,
             border=4,
         )
-        qr.add_data(attendee_id)
+        qr.add_data(qr_data)
         qr.make(fit=True)
         qr_img = qr.make_image(fill_color="black", back_color="white")
 
@@ -99,6 +101,7 @@ def generate_and_store_qr_codes():
     conn.close()
 
     return new_qr_codes_generated
+
 
 
 def mark_attendance(attendee_id):
