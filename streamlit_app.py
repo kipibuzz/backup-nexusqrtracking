@@ -168,32 +168,48 @@ def generate_attendance_statistics(data):
     }
 
 
+primary_color = "#007BFF"
+secondary_color = "#6C757D"
+st.set_page_config(
+    page_title="NexusPassCheck",
+    page_icon=":passport_control:",
+    layout="wide",
+)
+
 # Streamlit app
 st.title("NexusPassCheck")
 
 # Custom menu options with emojis
 menu_choices = {
-    "Generate QR Codes": "🔐 Generate QR Codes",
     "QR Code Scanner": "📷 QR Code Scanner",
     "Attendance Statistics": "📊 Attendance Statistics",
+    "Generate QR Codes": "🔐 Generate QR Codes",
+    
 }
 
 menu_choice = st.sidebar.radio("Select Page", list(menu_choices.values()))
+st.markdown(
+    f"""
+    <style>
+        .sidebar .sidebar-content {{
+            background-color: {secondary_color};
+        }}
+        .css-1aumxhk {{
+            background-color: {primary_color};
+        }}
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
 
-if st.button("Generate QR Codes"):
-    new_qr_codes_generated = generate_and_store_qr_codes()
-    if new_qr_codes_generated > 0:
-        st.success(
-            f"{new_qr_codes_generated} new QR codes generated and stored successfully!"
-        )
-    elif new_qr_codes_generated == 0:
-        st.info("No new QR codes generated. QR codes already exist for all attendees.")
-    else:
-        st.warning("QR codes could not be generated. Please check for any issues.")
 
 # QR code scanner page
-elif menu_choice == menu_choices["QR Code Scanner"]:
+# ... (your existing imports and functions)
+
+# QR code scanner page
+if menu_choice == menu_choices["QR Code Scanner"]:
     st.header('QR Code Scanner')
+    st.write("Use the camera input below to scan QR codes.")
 
     image = st.camera_input("Show QR code")
 
@@ -256,17 +272,10 @@ elif menu_choice == menu_choices["QR Code Scanner"]:
 
         st.write(message)  # Display the message after processing the QR code
 
+# ... (rest of your code)
 
-
-
-
-# elif menu_choice == menu_choices["Attendance Statistics"]:
-#     # Attendance statistics page
-#     st.header('Attendance Statistics')
-#     # ... (rest of your code for attendance statistics)
 
 elif menu_choice == menu_choices["Attendance Statistics"]:
-    # Attendance statistics page
     st.header("Attendance Statistics")
 
     # Query attendance data
@@ -306,3 +315,18 @@ elif menu_choice == menu_choices["Attendance Statistics"]:
 
     # Display the pie chart
     st.pyplot(plt)
+
+elif menu_choice == menu_choices["Create QR Codes"]:
+    st.header("Create QR Codes")
+    st.write("Click the button below to generate QR codes for attendees.")
+
+    if st.button("Generate QR Codes"):
+        new_qr_codes_generated = generate_and_store_qr_codes()
+        if new_qr_codes_generated > 0:
+            st.success(
+                f"{new_qr_codes_generated} new QR codes generated and stored successfully!"
+            )
+        elif new_qr_codes_generated == 0:
+            st.info("No new QR codes generated. QR codes already exist for all attendees.")
+        else:
+            st.warning("QR codes could not be generated.
