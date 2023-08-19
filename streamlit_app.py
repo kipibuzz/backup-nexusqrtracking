@@ -242,11 +242,8 @@ if menu_choice == menu_choices["QR Code Scanner"]:
                         st.warning("Invalid QR code format. Please make sure the QR code data is in the format 'AttendeeID FirstNameLastName'")
                         continue
 
-                    # ... (rest of your processing logic)
-                    
-
                     # Fetch the QR_CODE identifier from the Snowflake table based on the scanned QR data
-                        conn = snowflake.connector.connect(
+                    conn = snowflake.connector.connect(
                         user=CONNECTION_PARAMETERS['user'],
                         password=CONNECTION_PARAMETERS['password'],
                         account=CONNECTION_PARAMETERS['account'],
@@ -262,27 +259,30 @@ if menu_choice == menu_choices["QR Code Scanner"]:
                     if row:
                         qr_code_identifier, attended = row
                         if qr_code_identifier:
-                           if attended:
-                               message = f'Attendance already marked for Attendee ID: {attendee_id}'
-                             else:
-                            # Mark attendance
-                                 mark_attendance(attendee_id)
-                                 conn.commit()
+                            if attended:
+                                message = f'Attendance already marked for Attendee ID: {attendee_id}'
+                            else:
+                                # Mark attendance
+                                mark_attendance(attendee_id)
+                                conn.commit()
 
-                            # Update event statistics table
+                                # Update event statistics table
                                 cursor.execute(
                                     f"UPDATE EVENT_STATISTICS SET TOTAL_ATTENDED = TOTAL_ATTENDED + 1 WHERE EVENT_DATE = CURRENT_DATE()"
                                 )
                                 conn.commit()
 
                                 message = f'QR code scanned successfully. Attendee marked as attended. Attendee ID: {attendee_id}'
-                         else:
+                        else:
                             message = 'Invalid QR code.'
-                     else:
+                    else:
                         message = 'QR code not found in the database.'
 
-                cursor.close()
-                conn.close()
+                    cursor.close()
+                    conn.close()
+
+                st.write(message)  # Display the message after processing the QR code
+
 
 
 
