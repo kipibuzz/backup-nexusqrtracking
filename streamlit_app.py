@@ -10,6 +10,9 @@ import io
 import tempfile
 import boto3
 
+
+attendance_status = {}
+
 # Snowflake connection parameters
 CONNECTION_PARAMETERS = {
     "account": st.secrets['account'], 
@@ -120,7 +123,6 @@ if st.button('Generate QR Codes'):
             st.warning("QR codes could not be generated. Please check for any issues.")
 
 elif menu_choice == menu_choices["QR Code Scanner"]:
-    # QR code scanner page
     st.header('QR Code Scanner')
 
     image = st.camera_input("Show QR code")
@@ -133,7 +135,15 @@ elif menu_choice == menu_choices["QR Code Scanner"]:
 
         for obj in decoded_objects:
             qr_data = obj.data.decode('utf-8')
-            st.write(f"QR Code Data: {qr_data}")
+            
+            if qr_data in attendance_status:
+                if attendance_status[qr_data]:
+                    st.error("QR code already scanned and attendee marked.")
+                else:
+                    attendance_status[qr_data] = True
+                    st.success("QR code scanned successfully. Attendee marked as attended.")
+            else:
+                st.warning("Invalid QR code. Please try again.")
 
 # elif menu_choice == menu_choices["Attendance Statistics"]:
 #     # Attendance statistics page
