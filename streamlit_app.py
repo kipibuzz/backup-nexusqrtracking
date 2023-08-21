@@ -132,9 +132,6 @@ def mark_attendance(attendee_id):
     conn.close()
 
 
-    # Close the cursor and connection
-    cursor.close()
-    conn.close()
 
 def query_attendance_data():
     conn = snowflake.connector.connect(
