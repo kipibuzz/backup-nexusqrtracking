@@ -11,6 +11,7 @@ import tempfile
 import boto3
 import botocore
 import botocore.exceptions
+from streamlit_back_camera_input import back_camera_input
 
 
 attendance_status = {}
@@ -208,7 +209,7 @@ if menu_choice == menu_choices["QR Code Scanner"]:
 
     # Display the camera feed from the back camera in the second column
     with col2:
-        image = st.camera_input("Show QR code", key="qr_camera")
+         image = back_camera_input()
 
     if image is not None:
         bytes_data = image.getvalue()
